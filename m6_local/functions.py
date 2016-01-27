@@ -28,3 +28,23 @@ def robot_college(learning_funcs, scorers, data):
             output.append(temp)
     return output
 
+def dates_one_hot(date_series):
+    """
+    Takes a pd.Series of Dates, returns several one hots
+    TODO: Add Holiday / Holiday Offset One-Hots
+    TODO: Select Which Onehots you actually want in the returned product
+    :param date_series: pd.Series
+    :return: scipy.Sparse
+    ## These will come in handy for adding 'holiday' flags
+    # from pandas.tseries.holiday import USFederalHolidayCalendar, get_calendar
+    # get_calendar("USFederalHolidayCalendar")
+    """
+    from scipy.sparse import hstack
+    from pandas import get_dummies
+    output = hstack( [
+        get_dummies(date_series.apply(lambda x: x.strftime("%W")), sparse= True),
+        get_dummies(date_series.apply(lambda x: x.strftime("%w")), sparse= True),
+        get_dummies(date_series.apply(lambda x: x.strftime("%d")), sparse= True),
+        get_dummies(date_series.apply(lambda x: x.strftime("%m")), sparse= True),
+        get_dummies(date_series.apply(lambda x: x.strftime("%Y")), sparse= True)    ])
+    return output

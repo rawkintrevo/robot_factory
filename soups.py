@@ -7,6 +7,8 @@ from sklearn.metrics import explained_variance_score, mean_absolute_error, mean_
 from sklearn.cross_validation import train_test_split
 from sklearn.preprocessing import OneHotEncoder
 
+from m6_local.functions import dates_one_hot
+
 data = pd.DataFrame.from_csv("C:/Users/tgrant/Documents/oos_pred_poc/soups.csv", index_col=None)
 data = data[data['ACT_SALES_QTY'] > 0]
 print "data loaded and filtered"
@@ -16,15 +18,9 @@ data['fixed_dates'] = pd.to_datetime(data['DATE'])
 print 'updated dates'
 one_hot_store_ids = pd.get_dummies(data['STORE_ID'], sparse= True)
 one_hot_item_ids = pd.get_dummies(data['ITEM_ID'], sparse=True)
-one_hot_week_num = pd.get_dummies(data['fixed_dates'].apply(lambda x: x.strftime("%W")), sparse= True)
-one_hot_weekday = pd.get_dummies(data['fixed_dates'].apply(lambda x: x.strftime("%w")), sparse= True)
-one_hot_dom = pd.get_dummies(data['fixed_dates'].apply(lambda x: x.strftime("%d")), sparse= True)
-one_hot_month = pd.get_dummies(data['fixed_dates'].apply(lambda x: x.strftime("%m")), sparse= True)
-one_hot_year = pd.get_dummies(data['fixed_dates'].apply(lambda x: x.strftime("%Y")), sparse= True)
+one_hot_date = dates_one_hot(data['fixed_dates'])
 print 'created one-hots'
-## These will come in handy for adding 'holiday' flags
-# from pandas.tseries.holiday import USFederalHolidayCalendar, get_calendar
-# get_calendar("USFederalHolidayCalendar")
+
 #one_hot_dates = pd.get_dummies(data['DATE'], sparse=True)
 # still need some other stuff - eg promo, act price/reg price
 # need to normalize act_sales
@@ -35,7 +31,7 @@ from sklearn.preprocessing import MinMaxScaler
 
 from scipy.sparse import hstack
 # need discount and data['ON_PROMOTION']
-X = hstack([ one_hot_dom,one_hot_month, one_hot_week_num, one_hot_weekday, one_hot_year, one_hot_item_ids, one_hot_store_ids])
+X = hstack([ one_hot_date, one_hot_item_ids, one_hot_store_ids])
 
 
 y_scaler = MinMaxScaler()
